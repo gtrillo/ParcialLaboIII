@@ -1,41 +1,37 @@
 <?php
-// Error Handling
-error_reporting(-1);
-ini_set('display_errors', 1);
+$method = $_SERVER['REQUEST_METHOD'];
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Factory\AppFactory;
-use Slim\Routing\RouteCollectorProxy;
+if ($method === 'GET') {
+    if (isset($_GET['accion'])) {
+        $accion = $_GET['accion'];
+        switch ($accion) {
+            case 'consulta':
+                include 'consultaVentas.php';
+                break;
+        }
+    } 
+} elseif ($method === 'POST' || $method === 'PUT') {
+    if (isset($_POST['accion']) || isset($_POST['_method'])) {
+        $accion = isset($_POST['_method']) ? $_POST['_method'] : $_POST['accion'];
 
-require __DIR__ . '/vendor/autoload.php';
-
-// Instantiate App
-$app = AppFactory::create();
-
-// Add error middleware
-$app->addErrorMiddleware(true, true, true);
-
-// Add parse body
-$app->addBodyParsingMiddleware();
-
-// Routes
-$app->get('[/]', function (Request $request, Response $response) {    
-    $payload = json_encode(array('method' => 'GET', 'msg' => "Bienvenido a SlimFramework 2023"));
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');
-});
-
-$app->post('[/]', function (Request $request, Response $response) {    
-    $payload = json_encode(array('method' => 'POST', 'msg' => "Bienvenido a SlimFramework 2023"));
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');
-});
-
-$app->post('/test', function (Request $request, Response $response) {    
-    $payload = json_encode(array('method' => 'POST', 'msg' => "Bienvenido a SlimFramework 2023"));
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');
-});
-
-$app->run();
+        if ($accion === 'modificacion') {
+            include 'ModificarVenta.php';
+        } else {
+            switch ($accion) {
+                case 'alta':
+                    include 'HeladeriaAlta.php';
+                    break;
+                case 'validacion':
+                    // Código para el caso de validación
+                    break;
+                case 'venta':
+                    include 'altaVenta.php';
+                    break;
+                case 'devolucion':
+                    include 'DevolverHelado.php';
+                    break;    
+            }
+        }
+    }
+}
+?>
